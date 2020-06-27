@@ -8,6 +8,7 @@ from selenium.webdriver import ChromeOptions
 import csv
 import codecs
 import re
+import random
 
 
 
@@ -52,16 +53,11 @@ def main():
     # browser.execute_script(js2)
 
     time.sleep(5)
-    ls = wait.until(
-        EC.visibility_of_element_located((By.ID, "mainsrp-itemlist"))
-    )
-    time.sleep(0.5)
     browser.execute_script("window.scrollTo(0,document.body.scrollHeight-500)")
 
     page_num = wait.until(
         EC.presence_of_all_elements_located((By.CLASS_NAME, "total"))
     )
-
     page_num = page_num[0].text.split(' ')
     page_num = int(page_num[1])
     print('列表总页数', page_num)
