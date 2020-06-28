@@ -25,14 +25,22 @@ def main():
     url = 'https://fresh.jd.com/'
     browser.get(url)
 
+    more = browser.find_element_by_xpath('//dd[contains(@class,"cate_con")]//a[text()="更多"]')
+
+    browser.execute_script("arguments[0].style.display = 'none'; return arguments[0];", more)
+
     # 获取首页分类栏全部品种的url
     shop_list_url = []
     shop_list = wait.until(
         EC.presence_of_all_elements_located((By.XPATH, '//dd[contains(@class,"cate_con")]//a'))
     )
+    # for i in shop_list:
+    #     shop_list_url.append(i.get_attribute('href'))
     for i in shop_list:
-        shop_list_url.append(i.get_attribute('href'))
-    # print(shop_list_url)
+        i=i.get_attribute('href')
+        if len(i)>70:
+            shop_list_url.append(i)
+
 
     # 根据首页分类url,进一步解析
     for j in shop_list_url:
@@ -65,10 +73,8 @@ def main():
             xiaoliang = xiaoliang.text.strip()
             print('销量:', xiaoliang)
             store = item.find_elements_by_xpath('.//div[@class="p-shop"]/span/a')
-            store = store.text.strip()
             if len(store) >0:
-
-                print('店铺:', store)
+                print('店铺:', store[0].text.strip())
             else:
                 store='空'
                 print('店铺:', store)
@@ -76,15 +82,15 @@ def main():
             img = img.get_attribute('src')
             print('图片链接:', img)
             print('=' * 200)
-        # 翻页处理
-        browser.execute_script('window.scrollTo(0,document.body.scrollHeight-500);')
-        next_page_btn = wait.until(
-            EC.presence_of_element_located((By.CLASS_NAME, 'pn-next'))
-        )
-        print('next page...')
-        action = ActionChains(browser)
-        action.move_to_element(next_page_btn).click().perform()
-        time.sleep(random.random() * 5)
+            # 翻页处理
+            browser.execute_script('window.scrollTo(0,document.body.scrollHeight-500);')
+            next_page_btn = wait.until(
+                EC.presence_of_element_located((By.CLASS_NAME, 'pn-next'))
+            )
+            print('next page...')
+            action = ActionChains(browser)
+            action.move_to_element(next_page_btn).click().perform()
+            time.sleep(random.random() * 2)
 
 
 if __name__ == '__main__':
