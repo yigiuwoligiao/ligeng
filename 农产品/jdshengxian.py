@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver import ChromeOptions
 import random
+import pymysql
 
 
 def main():
@@ -53,9 +54,9 @@ def main():
         # )
         # next_btn=int(next_btn[0].text())
         # print(next_btn)
-        fenlei = browser.find_elements_by_class_name('search-key')[0]
-        fenlei=fenlei.text.strip()
-        print('当前品种-------', fenlei)
+        variety = browser.find_elements_by_class_name('search-key')[0]
+        variety=variety.text.strip()
+        print('当前品种-------', variety)
         ls = wait.until(
             EC.presence_of_all_elements_located((By.XPATH, '//div[@id="J_goodsList"]/ul/li[@class="gl-item"]'))
         )
@@ -65,6 +66,9 @@ def main():
             title = item.find_elements_by_xpath('.//div[@class="p-name p-name-type-2"]/a/em')[0]
             title = title.text.strip()
             print('标题:', title)
+            detail_url = item.find_elements_by_xpath('.//div[@class="p-name p-name-type-2"]/a')[0]
+            detail_url = detail_url.get_attribute('href')
+            print('商品链接:', detail_url)
             price = item.find_elements_by_xpath('.//div[@class="p-price"]/strong/i')[0]
             price = ''.join(price.text).strip()
             print('价格:', price)
@@ -82,15 +86,54 @@ def main():
             img = img.get_attribute('src')
             print('图片链接:', img)
             print('=' * 200)
-            # 翻页处理
-            browser.execute_script('window.scrollTo(0,document.body.scrollHeight-500);')
-            next_page_btn = wait.until(
-                EC.presence_of_element_located((By.CLASS_NAME, 'pn-next'))
-            )
-            print('next page...')
-            action = ActionChains(browser)
-            action.move_to_element(next_page_btn).click().perform()
-            time.sleep(random.random() * 2)
+        # 翻页处理
+        browser.execute_script('window.scrollTo(0,document.body.scrollHeight-500);')
+        next_page_btn = wait.until(
+            EC.presence_of_element_located((By.CLASS_NAME, 'pn-next'))
+        )
+        print('next page...')
+        action = ActionChains(browser)
+        action.move_to_element(next_page_btn).click().perform()
+        time.sleep(random.random() * 2)
+
+        connect=pymysql.connect(host='127.0.0.1',db='ligeng',user='root',password='123456',charset='utf8')
+        cursor=connect.cursor()
+        sql='insert into jdshengxian(variety,title,detail_url,price,seles,store,img_url) values(%s,%s,%s,%s,%s,%s,%s)'
+        try:
+            cursor.execute(sql,(variety,title,detail_url,price,xiaoliang,store,img))
+            connect.commit()
+            print('数据库保存成功')
+        except:
+            print('数据库保存失败')
+
+# def save_mysql('需要添加的数据名称'):
+#
+# 　　# 设置mysql连接
+# 　　connect = pymysql.connect(
+# 　　　　# IP为本地
+# 　　　　host='localhost'
+# 　　　　# 数据库名
+# 　　　　db='自己的数据库名'
+# 　　　　# 主机名
+# 　　　　user='root'
+# 　　　　# 密码，没有则用空字符串表示
+# 　　　　password='')
+# 　　# 创建游标
+# 　　cursor = connect.cursor()
+# 　　# 编写数据库语
+# 　　sql = "insert into yao('需要添加的数据名称') VALUES ('有多少个值就填写多少个'%s))"
+# 　　#例如：
+# 　　　　sql = "insert into yao(title,price,store) VALUES(%s,%s,%s)"
+# 　　# 判断插入是否成功
+# 　　try:
+# 　　　　curse.execute(sql,('需要添加的数据名称'))
+# 　　　　#例如：
+# 　　　　　　curse.execute(sql,(title,price,store))
+# 　　　　connect.commit()
+# 　　　　print('数据插入成功')
+# 　　except:
+# 　　　　print('数据插入失败')
+
 
 
 if __name__ == '__main__':
