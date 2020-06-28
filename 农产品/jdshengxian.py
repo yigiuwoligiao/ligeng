@@ -55,7 +55,7 @@ def main():
         # next_btn=int(next_btn[0].text())
         # print(next_btn)
         variety = browser.find_elements_by_class_name('search-key')[0]
-        variety=variety.text.strip()
+        variety=str(variety.text.strip())
         print('当前品种-------', variety)
         ls = wait.until(
             EC.presence_of_all_elements_located((By.XPATH, '//div[@id="J_goodsList"]/ul/li[@class="gl-item"]'))
@@ -64,7 +64,7 @@ def main():
         time.sleep(1)
         for item in ls:
             title = item.find_elements_by_xpath('.//div[@class="p-name p-name-type-2"]/a/em')[0]
-            title = title.text.strip()
+            title = str(title.text.strip())
             print('标题:', title)
             detail_url = item.find_elements_by_xpath('.//div[@class="p-name p-name-type-2"]/a')[0]
             detail_url = detail_url.get_attribute('href')
@@ -96,15 +96,14 @@ def main():
         action.move_to_element(next_page_btn).click().perform()
         time.sleep(random.random() * 2)
 
-        connect=pymysql.connect(host='127.0.0.1',db='ligeng',user='root',password='123456',charset='utf8')
-        cursor=connect.cursor()
+        conn=pymysql.connect(host='127.0.0.1',port=3306,db='ligeng',user='root',password='123456',charset='utf8')
+        cursor=conn.cursor()
         sql='insert into jdshengxian(variety,title,detail_url,price,seles,store,img_url) values(%s,%s,%s,%s,%s,%s,%s)'
-        try:
-            cursor.execute(sql,(variety,title,detail_url,price,xiaoliang,store,img))
-            connect.commit()
-            print('数据库保存成功')
-        except:
-            print('数据库保存失败')
+
+        cursor.execute(sql,(variety,title,detail_url,price,xiaoliang,store,img))
+        conn.commit()
+        print('数据库保存成功')
+
 
 # def save_mysql('需要添加的数据名称'):
 #
