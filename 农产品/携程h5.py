@@ -2,6 +2,8 @@ import requests
 from lxml import etree
 from requests.packages import urllib3
 urllib3.disable_warnings()
+import json
+
 
 
 
@@ -19,15 +21,6 @@ def get_text(url,page):
     params = {
         'basicRoomName': "",
         'groupTypeBitMap': '2',
-        'hotelId': '345041',
-        'needStatisticInfo': '0',
-        'order': '0',
-        'pageIndex': page,  # 第几页
-        'pageSize': '10',  # 每次加载10条
-        'tagId': '0',
-        'travelType': '-1',
-
-        'auth': "",
         'cid': "09031176110457811441",
         'ctok': "",
         'cver': "1.0",
@@ -36,16 +29,31 @@ def get_text(url,page):
         'sid': "8888",
         'syscode': "09",
         'xsid': "",
+        'hotelId': '345041',
+        'needStatisticInfo': '0',
+        'order': '0',
+        'pageIndex': page,  # 第几页
+        'pageSize': '10',  # 每次加载10条
+        'tagId': '0',
+        'travelType': '-1',
+        'auth': "",
+
 
     }
-    response = requests.post(url, headers=headers, params=params, verify=False)
+    response = requests.post(url, headers=headers, data=json.dumps(params), verify=False)
     html = response.content.decode('utf-8')
     print(html)
+    page+=1
     return html
 
 
-def get_parser(html):
 
+def get_parser(html):
+    '''
+    改成json获取
+    :param html:
+    :return:
+    '''
     parser_ls=[]
     html = etree.HTML(html)
     ls = html.xpath('//div[@class="dn hotel-t-b-border"]/div')
