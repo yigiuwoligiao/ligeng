@@ -1,15 +1,11 @@
 import requests
-from lxml import etree
 from requests.packages import urllib3
-
-urllib3.disable_warnings()
 import json
-
+urllib3.disable_warnings()
 
 def get_text(url, page):
     '''
-    原本要求是http://hotels.ctrip.com/hotel/345041.html
-    但是有js加密,eleven参数不好弄,用f12改成手机界面的url,绕过js加密
+
     :param url:
     :param page:
     :return:
@@ -51,7 +47,7 @@ def get_text(url, page):
 
 def get_parser1(html):
     '''
-
+    解析
     :param html:
     :return:
     '''
@@ -65,11 +61,19 @@ def get_parser1(html):
         x_pltime = i['postDate']
         x_fangxing = i['baseRoomName']
         x_content = i['content']
-        x_jdcontent = i['feedbackList'][0]['content']
-        if len(x_jdcontent) > 0:
-            x_jdcontent = x_jdcontent
-        else:
-            x_jdcontent = '酒店暂未回复'
+        #酒店回复这一段有个问题,如果酒店不回复,那么是完全没有feedbackList这个键的,所以提前处理一下
+        try:
+            if i['feedbackList']:
+                x_jdcontent = i['feedbackList']
+                if len(x_jdcontent) > 0:
+                    x_jdcontent = x_jdcontent[0]['content']
+                else:
+                    x_jdcontent = '没有回复'
+            else:
+                x_jdcontent = '没有回复'
+        except Exception as e:
+            x_jdcontent = '没有回复'
+
         print(x_name)
         print(x_type)
         print(x_num)
@@ -80,9 +84,9 @@ def get_parser1(html):
         print(x_jdcontent)
         print('*' * 200)
         p_t = [x_name, '\r', x_type, '\r', x_num, '\r', x_starttime, '\r', x_pltime, '\r', x_fangxing, '\r', x_content,
-               '\r', x_jdcontent]
+               '\r', x_jdcontent, '\r']
         parser_ls.append(p_t)
-        return parser_ls
+    return parser_ls
 
 
 def wride(parser_ls):
@@ -104,15 +108,13 @@ def wride(parser_ls):
 
 
 if __name__ == '__main__':
+    '''
+    原本要求是http://hotels.ctrip.com/hotel/345041.html,爬单个酒店的评论及酒店回复情况的
+    但是有js加密,eleven参数不好弄,用f12改成手机界面的url,绕过js加密
+    '''
     url = 'https://m.ctrip.com/restapi/soa2/16765/gethotelcomment?&_fxpcqlniredt=09031176110457811441'
-    for page in range(1, 10):
+    for page in range(1, 10):#翻10页
         html = get_text(url, page)
+        print(len(html))
         ls = get_parser1(html)
         wride(ls)
-
-
-
-
-
-
-
