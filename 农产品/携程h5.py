@@ -1,13 +1,12 @@
 import requests
 from lxml import etree
 from requests.packages import urllib3
+
 urllib3.disable_warnings()
 import json
 
 
-
-
-def get_text(url,page):
+def get_text(url, page):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36',
         'content-type': 'application/json',
@@ -38,38 +37,28 @@ def get_text(url,page):
         'travelType': '-1',
         'auth': "",
 
-
     }
     response = requests.post(url, headers=headers, data=json.dumps(params), verify=False)
-    html = response.content.decode('utf-8')
-    print(html)
-    page+=1
+    # html = response.content.decode('utf-8')
+    html = response.text
+    # print(html)
     return html
 
 
-
-def get_parser(html):
-    '''
-    改成json获取
-    :param html:
-    :return:
-    '''
-    parser_ls=[]
-    html = etree.HTML(html)
-    ls = html.xpath('//div[@class="dn hotel-t-b-border"]/div')
-    for i in ls:
-        x_name = i.xpath('.//p[@class="comment-title"]/span[1]/text()')[0]  # 用户名
-        x_type = i.xpath('.//p[@class="dn-checkin"]/span[2]/em/text()')[0]  # 出游类型
-        x_num = i.xpath('.//div[@class="g-ve"]/span/strong/text()')[0]  # 评分
-        x_starttime = i.xpath('.//p[@class="dn-checkin"]/span[1]/text()')[0]  # 入住时间   两个连在一起需要拆分
-        x_starttime = x_starttime.split('，')[0].split('入住')[0]
-        x_pltime = i.xpath('.//p[@class="dn-checkin"]/span[1]/text()')[0]  # 评论时间
-        x_pltime = x_pltime.split('，')[1].split('发表')[0]
-        x_fangxing = i.xpath('.//p[@class="dn-checkin"]/span[3]/text()')[0]  # 房型
-        x_content = i.xpath('.//div[@class="cbd"]/p/text()')[0]  # 评论内容
-        x_jdcontent = i.xpath('.//div[@class="cm"]/ul/li[1]/text()')  # 酒店评论
+def get_parser1(html):
+    parser_ls = []
+    data = json.loads(html).get('othersCommentList')
+    for i in data:
+        x_name = i['userNickName']
+        x_type = i['travelType']
+        x_num = i['ratingPoint']
+        x_starttime = i['checkInDate']
+        x_pltime = i['postDate']
+        x_fangxing = i['baseRoomName']
+        x_content = i['content']
+        x_jdcontent = i['feedbackList'][0]['content']
         if len(x_jdcontent) > 0:
-            x_jdcontent = x_jdcontent[0]
+            x_jdcontent = x_jdcontent
         else:
             x_jdcontent = '酒店暂未回复'
         print(x_name)
@@ -81,26 +70,25 @@ def get_parser(html):
         print(x_content)
         print(x_jdcontent)
         print('*' * 200)
-        parser_ls.append(x_name)
-        parser_ls.append(x_type)
-        parser_ls.append(x_num)
-        parser_ls.append(x_starttime)
-        parser_ls.append(x_pltime)
-        parser_ls.append(x_fangxing)
-        parser_ls.append(x_content)
-        parser_ls.append(x_jdcontent)
-    return parser_ls
+        p_t = (x_name, '\r', x_type, '\r', x_num, '\r', x_starttime, '\r', x_pltime, '\r', x_fangxing, '\r', x_content, '\r',x_jdcontent)
+        parser_ls.append(p_t)
+        return parser_ls
 
 
 def wride(parser_ls):
-    with open('./xiecheng.txt','a+',encoding='utf-8')as f:
-        f.writelines(parser_ls)
-        f.write('\r\n')
-        f.close()
-        print('写入完毕')
+    try:
+        with open('./xiecheng.txt', 'a+', encoding='utf-8')as f:
+            f.writelines(parser_ls)
+            f.write('\r\n')
+            f.close()
+            print('写入完毕')
+    except:
+        print('写入失败')
+
+
 if __name__ == '__main__':
     url = 'https://m.ctrip.com/restapi/soa2/16765/gethotelcomment?&_fxpcqlniredt=09031176110457811441'
-    for page in range(10):
-        html=get_text(url,page)
-        ls=get_parser(html)
+    for page in range(1,10):
+        html = get_text(url, page)
+        ls = get_parser1(html)
         wride(ls)
