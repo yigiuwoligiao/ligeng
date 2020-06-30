@@ -7,6 +7,13 @@ import json
 
 
 def get_text(url, page):
+    '''
+    原本要求是http://hotels.ctrip.com/hotel/345041.html
+    但是有js加密,eleven参数不好弄,用f12改成手机界面的url,绕过js加密
+    :param url:
+    :param page:
+    :return:
+    '''
     headers = {
         'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36',
         'content-type': 'application/json',
@@ -15,7 +22,6 @@ def get_text(url, page):
         'Host': 'm.ctrip.com',
         'Origin': 'https://m.ctrip.com',
         'Referer': 'https://m.ctrip.com/webapp/hotel/hoteldetail/dianping/345041.html?&fr=detail&atime=20200629&days=1'
-
     }
     params = {
         'basicRoomName': "",
@@ -36,16 +42,19 @@ def get_text(url, page):
         'tagId': '0',
         'travelType': '-1',
         'auth': "",
-
     }
     response = requests.post(url, headers=headers, data=json.dumps(params), verify=False)
-    # html = response.content.decode('utf-8')
     html = response.text
     # print(html)
     return html
 
 
 def get_parser1(html):
+    '''
+
+    :param html:
+    :return:
+    '''
     parser_ls = []
     data = json.loads(html).get('othersCommentList')
     for i in data:
@@ -70,25 +79,40 @@ def get_parser1(html):
         print(x_content)
         print(x_jdcontent)
         print('*' * 200)
-        p_t = (x_name, '\r', x_type, '\r', x_num, '\r', x_starttime, '\r', x_pltime, '\r', x_fangxing, '\r', x_content, '\r',x_jdcontent)
+        p_t = [x_name, '\r', x_type, '\r', x_num, '\r', x_starttime, '\r', x_pltime, '\r', x_fangxing, '\r', x_content,
+               '\r', x_jdcontent]
         parser_ls.append(p_t)
         return parser_ls
 
 
 def wride(parser_ls):
+    '''
+    这边传进来的是列表套列表,先循环拿到正常的列表,然后再传入单个的字段,要求存txt
+    :param parser_ls:
+    :return:
+    '''
     try:
         with open('./xiecheng.txt', 'a+', encoding='utf-8')as f:
-            f.writelines(parser_ls)
+            for i in parser_ls:
+                for j in i:
+                    f.write(str(j))
             f.write('\r\n')
             f.close()
             print('写入完毕')
-    except:
-        print('写入失败')
+    except Exception as e:
+        print(e)
 
 
 if __name__ == '__main__':
     url = 'https://m.ctrip.com/restapi/soa2/16765/gethotelcomment?&_fxpcqlniredt=09031176110457811441'
-    for page in range(1,10):
+    for page in range(1, 10):
         html = get_text(url, page)
         ls = get_parser1(html)
         wride(ls)
+
+
+
+
+
+
+
