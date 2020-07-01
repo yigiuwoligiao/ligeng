@@ -91,7 +91,7 @@ def get_parser1(html):
 
 def wride(parser_ls):
     '''
-    这边传进来的是列表套列表,先循环拿到正常的列表,然后再传入单个的字段,要求存txt
+    这边传进来的parser_ls是列表套列表,先循环拿到正常的列表,然后再传入单个的字段,要求存txt
     :param parser_ls:
     :return:
     '''
