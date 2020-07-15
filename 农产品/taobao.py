@@ -34,9 +34,9 @@ def main():
     name = browser.find_element_by_id('fm-login-id')
     passw = browser.find_element_by_id('fm-login-password')
 
-    name.send_keys('路路的husband')
+    name.send_keys('淘宝账号')
     time.sleep(1)
-    passw.send_keys('LLL.4251020')
+    passw.send_keys('淘宝密码')
     wait=WebDriverWait(browser, 10)
 
     btn =wait.until(
